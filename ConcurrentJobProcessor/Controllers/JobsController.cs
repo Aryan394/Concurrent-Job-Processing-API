@@ -13,7 +13,7 @@ namespace ConcurrentJobProcessor.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateJob([FromBody] JobRequest jobRequest)
         {
-        var job = new Job
+            var job = new Job
             {
                 Id = Guid.NewGuid(),
                 Name = jobRequest.Name,
