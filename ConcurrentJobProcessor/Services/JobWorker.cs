@@ -4,9 +4,10 @@ using Microsoft.Extensions.Hosting;
 
 namespace ConcurrentJobProcessor.Services
 {
-    public class JobWorker(IJobQueue jobQueue) : BackgroundService
+    public class JobWorker(IJobQueue jobQueue, IJobStore jobStore) : BackgroundService
     {
         private readonly IJobQueue _jobQueue = jobQueue;
+        private readonly IJobStore _jobStore = jobStore;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -22,8 +23,12 @@ namespace ConcurrentJobProcessor.Services
             while (!stoppingToken.IsCancellationRequested)
             {
                 var job = await _jobQueue.DequeueJobAsync(stoppingToken);
+                job.Status = "Processing";
+                _jobStore.Update(job);
                 Console.WriteLine($"Worker {workerId} started Job {job.Id}");
                 await ProcessJob(job, workerId);
+                job.Status = "Completed";
+                _jobStore.Update(job);
 
             Console.WriteLine($"Worker {workerId} completed Job {job.Id}");
             }

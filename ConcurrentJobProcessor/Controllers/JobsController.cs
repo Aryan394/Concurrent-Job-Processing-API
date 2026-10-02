@@ -6,9 +6,10 @@ namespace ConcurrentJobProcessor.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class JobsController(IJobQueue jobQueue) : ControllerBase
+    public class JobsController(IJobQueue jobQueue, IJobStore jobStore) : ControllerBase
     {
         private readonly IJobQueue _jobQueue = jobQueue;
+        private readonly IJobStore _jobStore = jobStore;
 
         [HttpPost]
         public async Task<IActionResult> CreateJob([FromBody] JobRequest jobRequest)
@@ -21,10 +22,21 @@ namespace ConcurrentJobProcessor.Controllers
                 Status = "Queued",
                 CreatedAt = DateTime.UtcNow
             };
-        
-        await _jobQueue.EnqueueJobAsync(job);
+            _jobStore.Add(job);
+            await _jobQueue.EnqueueJobAsync(job);
+            return Ok(job);
+        }
+        [HttpGet("{id}")]
+        public IActionResult GetJob(Guid id)
+        {
+            var job = _jobStore.Get(id);
 
-        return Ok(job);
+            if (job == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(job);
         }
     }
 }

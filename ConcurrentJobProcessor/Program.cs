@@ -6,6 +6,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IJobQueue, JobQueue>();
 builder.Services.AddHostedService<JobWorker>();
+builder.Services.AddSingleton<IJobStore, JobStore>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
