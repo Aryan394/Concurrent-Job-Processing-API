@@ -4,8 +4,8 @@ namespace ConcurrentJobProcessor.Services
 {
     public interface IJobStore
     {
-        void Add(Job job);
-        Job? Get(Guid id);
-        void Update(Job job);
+        Task AddAsync(Job job);
+        Task<Job?> GetAsync(Guid id);
+        Task UpdateAsync(Job job);
     }
 }

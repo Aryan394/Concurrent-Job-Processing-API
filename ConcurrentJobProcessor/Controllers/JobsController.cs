@@ -23,15 +23,15 @@ namespace ConcurrentJobProcessor.Controllers
                 Status = JobStatus.Queued.ToString(),
                 CreatedAt = DateTime.UtcNow
             };
-            _jobStore.Add(job);
+            await _jobStore.AddAsync(job);
             await _jobQueue.EnqueueJobAsync(job);
             return Ok(job);
         }
         
         [HttpGet("{id}")]
-        public IActionResult GetJob(Guid id)
+        public async Task<IActionResult> GetJob(Guid id)
         {
-            var job = _jobStore.Get(id);
+            var job = _jobStore.GetAsync(id);
 
             if (job == null)
             {

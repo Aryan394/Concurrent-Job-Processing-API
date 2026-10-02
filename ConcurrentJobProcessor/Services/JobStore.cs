@@ -1,25 +1,30 @@
-using System.Collections.Concurrent;
+using ConcurrentJobProcessor.Data;
 using ConcurrentJobProcessor.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace ConcurrentJobProcessor.Services
+namespace ConcurrentJobProcessor.Services;
+
+public class JobStore(JobDbContext dbContext) : IJobStore
 {
-    public class JobStore : IJobStore
+    private readonly JobDbContext _dbContext = dbContext;
+
+    public async Task AddAsync(Job job)
     {
-        private readonly ConcurrentDictionary<Guid, Job> _jobs = new();
-        public void Add(Job job)
-        {
-            _jobs[job.Id] = job;
-        }
+        _dbContext.Jobs.Add(job);
 
-        public Job? Get(Guid id)
-        {
-            _jobs.TryGetValue(id, out var job);
-            return job;
-        }
+        await _dbContext.SaveChangesAsync();
+    }
 
-        public void Update(Job job)
-        {
-            _jobs[job.Id] = job;
-        }
+    public async Task<Job?> GetAsync(Guid id)
+    {
+        return await _dbContext.Jobs
+            .FirstOrDefaultAsync(x => x.Id == id);
+    }
+
+    public async Task UpdateAsync(Job job)
+    {
+        _dbContext.Jobs.Update(job);
+
+        await _dbContext.SaveChangesAsync();
     }
 }
