@@ -7,5 +7,6 @@ namespace ConcurrentJobProcessor.Services
         Task AddAsync(Job job);
         Task<Job?> GetAsync(Guid id);
         Task UpdateAsync(Job job);
+        Task<List<Job>> GetQueuedJobsAsync();
     }
 }

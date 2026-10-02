@@ -52,6 +52,7 @@ public class JobWorker(
 
                 job.Status = JobStatus.Completed.ToString();
                 job.CompletedAt = DateTime.UtcNow;
+                job.LastUpdatedAt = DateTime.UtcNow;
 
                 await jobStore.UpdateAsync(job);
 

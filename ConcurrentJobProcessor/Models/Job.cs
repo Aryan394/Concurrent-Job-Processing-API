@@ -12,6 +12,7 @@ namespace ConcurrentJobProcessor.Models
         public DateTime CreatedAt { get; set; }
         public DateTime? StartedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
+        public DateTime LastUpdatedAt { get; set; }
         public string? ErrorMessage { get; set; }
     }
 }

@@ -1,3 +1,4 @@
+using ConcurrentJobProcessor.Common;
 using ConcurrentJobProcessor.Data;
 using ConcurrentJobProcessor.Models;
 using Microsoft.EntityFrameworkCore;
@@ -26,5 +27,11 @@ public class JobStore(JobDbContext dbContext) : IJobStore
         _dbContext.Jobs.Update(job);
 
         await _dbContext.SaveChangesAsync();
+    }
+    public async Task<List<Job>> GetQueuedJobsAsync()
+    {
+    return await _dbContext.Jobs
+        .Where(x => x.Status == JobStatus.Queued.ToString())
+        .ToListAsync();
     }
 }

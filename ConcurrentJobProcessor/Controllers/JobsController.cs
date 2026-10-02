@@ -31,7 +31,7 @@ namespace ConcurrentJobProcessor.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetJob(Guid id)
         {
-            var job = _jobStore.GetAsync(id);
+            var job = await _jobStore.GetAsync(id);
 
             if (job == null)
             {
