@@ -22,15 +22,38 @@ namespace ConcurrentJobProcessor.Services
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var job = await _jobQueue.DequeueJobAsync(stoppingToken);
-                job.Status = "Processing";
-                _jobStore.Update(job);
-                Console.WriteLine($"Worker {workerId} started Job {job.Id}");
-                await ProcessJob(job, workerId);
-                job.Status = "Completed";
-                _jobStore.Update(job);
+                Job? job = null;
+                try
+                {
+                    job = await _jobQueue.DequeueJobAsync(stoppingToken);
+                    job.Status = JobStatus.Processing.ToString();
+                    job.StartedAt = DateTime.UtcNow;
+                    _jobStore.Update(job);
+                    Console.WriteLine($"Worker {workerId} started Job {job.Id}");
+                    await ProcessJob(job, workerId);
+                    job.Status = JobStatus.Completed.ToString();
+                    _jobStore.Update(job);
+                    Console.WriteLine($"Worker {workerId} completed Job {job.Id}");
+                }
+                catch (OperationCanceledException)
+                when (stoppingToken.IsCancellationRequested)
+                {
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    if (job == null)
+                    {
+                        Console.WriteLine($"Worker {workerId} encountered an error: {ex.Message}");
+                        continue;
+                    }
 
-            Console.WriteLine($"Worker {workerId} completed Job {job.Id}");
+                    job.Status = JobStatus.Failed.ToString();
+                    job.ErrorMessage = ex.Message;
+                    _jobStore.Update(job);
+                    Console.WriteLine(
+                        $"Worker {workerId} failed Job {job.Id}: {ex.Message}");
+                }
             }
         }
         private async Task ProcessJob(Job job, int workerId)

@@ -1,5 +1,6 @@
 using ConcurrentJobProcessor.Models;
 using ConcurrentJobProcessor.Services;
+using ConcurrentJobProcessor.Common;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ConcurrentJobProcessor.Controllers
@@ -19,13 +20,14 @@ namespace ConcurrentJobProcessor.Controllers
                 Id = Guid.NewGuid(),
                 Name = jobRequest.Name,
                 Payload = jobRequest.Payload,
-                Status = "Queued",
+                Status = JobStatus.Queued.ToString(),
                 CreatedAt = DateTime.UtcNow
             };
             _jobStore.Add(job);
             await _jobQueue.EnqueueJobAsync(job);
             return Ok(job);
         }
+        
         [HttpGet("{id}")]
         public IActionResult GetJob(Guid id)
         {
